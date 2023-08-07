@@ -24,9 +24,9 @@ endif
 ENGINE ?= "docker"
 
 # Image URL to use all building/pushing image targets
-IMG ?= kserve/modelmesh-controller:latest
+IMG ?= api.cp4d-412-power-bvt2.cp.fyre.ibm.com:5000/kserve/modelmesh-controller:latest
 # Namespace to deploy model-serve into
-NAMESPACE ?= "model-serving"
+NAMESPACE ?= "modelmesh-serving"
 
 CONTROLLER_GEN_VERSION ?= "v0.11.4"
 
@@ -49,7 +49,7 @@ all: manager
 # Run unit tests
 .PHONY: test
 test:
-	go test -coverprofile cover.out `go list ./... | grep -v fvt`
+	go test -v -coverprofile cover.out `go list ./... | grep -v fvt`
 
 # Run fvt tests. This requires an etcd, kubernetes connection, and model serving installation. Ginkgo CLI is used to run them in parallel
 .PHONY: fvt
@@ -84,7 +84,7 @@ start: generate fmt manifests
 
 # Install CRDs into a cluster
 .PHONY: install
-install: manifests
+install: manifests         
 	kustomize build config/crd | kubectl apply -f -
 
 # Uninstall CRDs from a cluster
@@ -154,6 +154,13 @@ build: build.develop
 # Build the develop docker image
 .PHONY: build.develop
 build.develop:
+#ifeq ($(shell uname -m), ppc64le)
+#	sed -i 's/KUSTOMIZE_VERSION=4.5.2/KUSTOMIZE_VERSION=5.1.0/' Dockerfile.develop
+#	echo ":Inside if"
+#else
+#	echo "Inside else"
+#endif
+
 	./scripts/build_devimage.sh $(ENGINE)
 
 # Start a terminal session in the develop docker container

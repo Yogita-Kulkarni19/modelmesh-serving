@@ -21,7 +21,7 @@ FROM registry.access.redhat.com/ubi8/go-toolset:1.19
 # don't provide "default" values (e.g. 'ARG TARGETARCH=amd64') for non-buildx environments,
 # see https://github.com/docker/buildx/issues/510
 ARG TARGETOS=linux
-ARG TARGETARCH=amd64
+ARG TARGETARCH=ppc64le
     
 ARG OPENSHIFT_VERSION=4.12
 ARG KUSTOMIZE_VERSION=4.5.2

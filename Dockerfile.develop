@@ -21,14 +21,14 @@ FROM registry.access.redhat.com/ubi8/go-toolset:1.19
 # don't provide "default" values (e.g. 'ARG TARGETARCH=amd64') for non-buildx environments,
 # see https://github.com/docker/buildx/issues/510
 ARG TARGETOS
-ARG TARGETARCH
+ARG TARGETARCH=ppc64le
     
 ARG OPENSHIFT_VERSION=4.12
 ARG KUSTOMIZE_VERSION=4.5.2
 ARG KUBEBUILDER_VERSION=v3.3.0
 ARG CONTROLLER_GEN_VERSION=v0.11.4
 
-ENV PATH=/usr/local/go/bin:$PATH:/usr/local/kubebuilder/bin:
+ENV PATH=/usr/local/go/bin:$PATH:/usr/local/bin:$PATH:/usr/local/kubebuilder/bin:
 
 USER root
 ENV HOME=/root
@@ -59,7 +59,7 @@ RUN true \
 
 # Download openshift-cli
 RUN true \
-    && curl -sSLf --output /tmp/oc_client.tar.gz https://mirror.openshift.com/pub/openshift-v4/${TARGETARCH}/clients/ocp/latest-${OPENSHIFT_VERSION}/openshift-client-${TARGETOS}.tar.gz \
+    && curl -sSLf --output /tmp/oc_client.tar.gz https://mirror.openshift.com/pub/openshift-v4/ppc64le/clients/ocp/4.12.1/openshift-client-linux.tar.gz \
     && tar -xvf /tmp/oc_client.tar.gz -C /tmp \
     && mv /tmp/oc /usr/local/bin \
     && mv /tmp/kubectl /usr/local/bin \
@@ -69,11 +69,20 @@ RUN true \
 
 # Download kustomize
 RUN true \
-    && curl -sSLf --output /tmp/kustomize.tar.gz https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_${TARGETOS}_${TARGETARCH}.tar.gz \
-    && tar -xvf /tmp/kustomize.tar.gz -C /tmp \
-    && mv /tmp/kustomize /usr/local/bin \
-    && chmod a+x /usr/local/bin/kustomize \
-    && rm -v /tmp/kustomize.tar.gz \
+    && echo ${KUSTOMIZE_VERSION} \
+    && echo "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.1.0/kustomize_v5.1.0_${TARGETOS}_${TARGETARCH}.tar.gz" \
+    && curl -sSLf --output /tmp/kustomize.tar.gz https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.1.0/kustomize_v5.1.0_${TARGETOS}_${TARGETARCH}.tar.gz \
+    && echo "------------ tmp --------------------" \
+    && ls /tmp \
+  # && tar -xvf /tmp/kustomize.tar.gz  \
+  # && echo "-------------- tmp after tar ------------------" \
+    && cp /tmp/kustomize.tar.gz /usr/local/bin \
+    && echo "---------------- usr/local/bin ----------------" \
+    && ls /usr/local/bin \
+#    && tar -xzvf /usr/local/bin/kustomize.tar.gz \
+    && ls /usr/local/bin \
+#    && chmod a+x /usr/local/bin/kustomize \
+   # && rm -v /tmp/kustomize.tar.gz \
     && true
 
 # Install yq 4.x
